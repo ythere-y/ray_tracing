@@ -23,6 +23,9 @@ class Vec3:
     def __sub__(self, other):
         return Vec3(self.e - other.vec())
 
+    def __neg__(self):
+        return Vec3(-self.e)
+
     def __truediv__(self, other):
         return Vec3(self.e / other)
 

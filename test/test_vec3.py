@@ -20,6 +20,16 @@ class TestVec3(unittest.TestCase):
                 same_flag = False
         self.assertTrue(same_flag)
 
+    def test_vec3_negative(self):
+        t_1 = model.Vec3(np.array([1, 2, 3]))
+        t_3 = -t_1
+        exp = np.array([-1, -2, -3])
+        same_flag = True
+        for i in range(3):
+            if not t_3[i] == exp[i]:
+                same_flag = False
+        self.assertTrue(same_flag)
+
     def test_get(self):
         t = model.Vec3(np.array([1, 2, 3]))
         self.assertEqual(t[0], 1)
