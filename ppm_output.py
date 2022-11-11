@@ -20,14 +20,14 @@ def output_train(file):
 
 def hit_sphere(center: point3, radius: float, r: Ray) -> bool:
     oc = r.origin()-center
-    a = r.direction().dot(r.direction())
-    b = 2.0*oc.dot(r.direction())
+    a = r.direction().length_squared()
+    half_b = oc.dot(r.direction())
     c = oc.dot(oc)-radius*radius
-    discriminant = b*b-4*a*c
+    discriminant = half_b*half_b-a*c
     if discriminant < 0:
         return -1.0
     else:
-        return (-b-np.sqrt(discriminant))/(2*a)
+        return (-half_b-np.sqrt(discriminant))/a
 
 
 def ray_color(r: Ray) -> color:
