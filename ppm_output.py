@@ -1,18 +1,18 @@
 import os
 import traceback
-import vec3
+from model import Vec3
 import numpy as np
 
 
 def output_train(file):
     nx = 200
     ny = 100
-    vec3.write_prefix(file, nx, ny)
+    Vec3.write_prefix(file, nx, ny)
     # file.write("P3\n{} {}\n255\n".format(nx, ny))
     for j in range(ny-1, -1, -1):
         for i in range(nx):
-            pixel_color = vec3.color(np.array([i/nx, j/ny, 0.25]))
-            vec3.write_color(file, pixel_color)
+            pixel_color = Vec3.color(np.array([i/nx, j/ny, 0.25]))
+            Vec3.write_color(file, pixel_color)
 
 
 def gen(file):

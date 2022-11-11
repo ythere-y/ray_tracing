@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class vec3:
+class Vec3:
     def __init__(self, arr) -> None:
         self.e = arr
 
@@ -18,16 +18,16 @@ class vec3:
         return self.e
 
     def __add__(self, other):
-        return vec3(self.e + other.vec())
+        return Vec3(self.e + other.vec())
 
     def __sub__(self, other):
-        return vec3(self.e - other.vec())
+        return Vec3(self.e - other.vec())
 
     def __truediv__(self, other):
-        return vec3(self.e / other.vec())
+        return Vec3(self.e / other.vec())
 
     def __mul__(self, other):
-        return vec3(self.e * other.vec())
+        return Vec3(self.e * other.vec())
 
     def __getitem__(self, idx: int):
         return self.e[idx]
@@ -51,7 +51,7 @@ class vec3:
         return self.e/self.length()
 
 
-class color(vec3):
+class color(Vec3):
     def __str__(self) -> str:
 
         out_vec = self.vec()*255.999
@@ -60,7 +60,7 @@ class color(vec3):
     pass
 
 
-class point3(vec3):
+class point3(Vec3):
     pass
 
 
