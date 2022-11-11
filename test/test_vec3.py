@@ -39,8 +39,8 @@ class TestVec3(unittest.TestCase):
         self.assertEqual(t_1.dot(t_2), 10)
 
     def test_length(self):
-        t = model.Vec3(np.array([1, 1, 1]))
-        self.assertEqual(t.length(), np.sqrt(3))
+        t = model.Vec3(np.array([0.5, 1, 1]))
+        self.assertEqual(t.length(), np.sqrt(1+1+0.25))
 
     def test_length_squared(self):
         t = model.Vec3(np.array([1, 1, 1]))
@@ -49,6 +49,8 @@ class TestVec3(unittest.TestCase):
     def test_unit(self):
         t = model.Vec3(np.array([1, 1, 1]))
         self.assertEqual(t.unit()[0], 1/np.sqrt(3))
+        t2 = model.Vec3(np.array([-1.777777, 1.0, -1.0]))
+        self.assertEqual(t.unit()[0], 0.5773502691896258)
 
 
 color_1 = model.color(np.array([1, 1, 1]))

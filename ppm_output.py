@@ -1,7 +1,8 @@
 import os
 import traceback
 import model
-from model import color
+from model import color, Ray, point3, Vec3
+
 import numpy as np
 from utils import write_prefix
 
@@ -17,14 +18,46 @@ def output_train(file):
             model.write_color(file, pixel_color)
 
 
+def ray_color(r: Ray) -> color:
+    unit_direction = r.direction().unit()
+    t = 0.5*(unit_direction.y()+1.0)
+    return color(np.array([1, 1, 1])*(1-t)+np.array([0.5, 0.7, 1.0])*t)
+
+
+def sky_viewer(file):
+    aspect_ratio = 16/9
+    image_width = 400
+    image_height = int(image_width/aspect_ratio)
+
+    viewport_height = 2
+    viewport_width = aspect_ratio*viewport_height
+    focal_length = 1
+
+    origin = point3(np.array([0, 0, 0]))
+    horizontal = Vec3(np.array([viewport_width, 0, 0]))
+    vertical = Vec3(np.array([0, viewport_height, 0]))
+    lower_left_corner = origin-horizontal/2 - \
+        vertical/2-Vec3(np.array([0, 0, focal_length]))
+
+    write_prefix(file, image_width, image_height)
+    for j in range(image_height-1, -1, -1):
+        for i in range(image_width):
+            u = i/(image_width+1)
+            v = j/(image_height-1)
+            r = Ray(origin, lower_left_corner+horizontal*u+vertical*v-origin)
+            pixel_color = ray_color(r)
+            model.write_color(file, pixel_color)
+
+
 def gen(file):
     print('gen started')
-    output_train(file)
+    # output_train(file)
+    sky_viewer(file)
     print('gen finished')
 
 
 def main():
-    file_name = './output/my_output2.ppm'
+    file_name = './output/sky_.ppm'
     # if not os.path.exists(file_name):
     #     open(file_name, 'w').close()
     with open(file_name, 'w') as file:

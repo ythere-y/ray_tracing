@@ -3,9 +3,9 @@ import numpy as np
 
 
 class Ray:
-    def __init__(self, orig, dir) -> None:
-        self.orig = point3(orig)
-        self.dir = point3(dir)
+    def __init__(self, orig: point3, dir: point3) -> None:
+        self.orig = orig
+        self.dir = dir
 
     def origin(self) -> point3:
         return self.orig

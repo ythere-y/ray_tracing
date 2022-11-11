@@ -24,10 +24,10 @@ class Vec3:
         return Vec3(self.e - other.vec())
 
     def __truediv__(self, other):
-        return Vec3(self.e / other.vec())
+        return Vec3(self.e / other)
 
     def __mul__(self, other):
-        return Vec3(self.e * other.vec())
+        return Vec3(self.e * other)
 
     def __getitem__(self, idx: int):
         return self.e[idx]
@@ -48,7 +48,9 @@ class Vec3:
         return np.cross(self.e, other.vec())
 
     def unit(self):
-        return self.e/self.length()
+        len = self.length()
+
+        return Vec3(self.e / len)
 
 
 class color(Vec3):
@@ -68,4 +70,5 @@ def write_color(file, color):
     if file == None:
         print(color)
     else:
+        # get = str(color)
         file.write(str(color))
