@@ -24,12 +24,17 @@ def hit_sphere(center: point3, radius: float, r: Ray) -> bool:
     b = 2.0*oc.dot(r.direction())
     c = oc.dot(oc)-radius*radius
     discriminant = b*b-4*a*c
-    return discriminant > 0
+    if discriminant < 0:
+        return -1.0
+    else:
+        return (-b-np.sqrt(discriminant))/(2*a)
 
 
 def ray_color(r: Ray) -> color:
-    if hit_sphere(point3(np.array([0, 0, -1])), 0.5, r):
-        return color(np.array([1, 0, 0]))
+    t = hit_sphere(point3(np.array([0, 0, -1])), 0.5, r)
+    if t > 0:
+        N = (r.at(t)-Vec3(np.array([0, 0, -1]))).unit()
+        return color(np.array([N.x()+1, N.y()+1, N.z()+1])/2)
     unit_direction = r.direction().unit()
     t = 0.5*(unit_direction.y()+1.0)
     return color(np.array([1, 1, 1])*(1-t)+np.array([0.5, 0.7, 1.0])*t)
@@ -68,7 +73,7 @@ def gen(file):
 
 
 def main():
-    file_name = './output/red_ball.ppm'
+    file_name = './output/see_ball.ppm'
     # if not os.path.exists(file_name):
     #     open(file_name, 'w').close()
     with open(file_name, 'w') as file:

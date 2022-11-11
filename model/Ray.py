@@ -14,4 +14,4 @@ class Ray:
         return self.dir
 
     def at(self, t: float) -> point3:
-        return self.orig+t*self.dir
+        return self.orig+self.dir*t
