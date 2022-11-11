@@ -18,7 +18,18 @@ def output_train(file):
             model.write_color(file, pixel_color)
 
 
+def hit_sphere(center: point3, radius: float, r: Ray) -> bool:
+    oc = r.origin()-center
+    a = r.direction().dot(r.direction())
+    b = 2.0*oc.dot(r.direction())
+    c = oc.dot(oc)-radius*radius
+    discriminant = b*b-4*a*c
+    return discriminant > 0
+
+
 def ray_color(r: Ray) -> color:
+    if hit_sphere(point3(np.array([0, 0, -1])), 0.5, r):
+        return color(np.array([1, 0, 0]))
     unit_direction = r.direction().unit()
     t = 0.5*(unit_direction.y()+1.0)
     return color(np.array([1, 1, 1])*(1-t)+np.array([0.5, 0.7, 1.0])*t)
@@ -36,7 +47,7 @@ def sky_viewer(file):
     origin = point3(np.array([0, 0, 0]))
     horizontal = Vec3(np.array([viewport_width, 0, 0]))
     vertical = Vec3(np.array([0, viewport_height, 0]))
-    lower_left_corner = origin-horizontal/2 - \
+    lower_left_corner = origin-horizontal/2 -\
         vertical/2-Vec3(np.array([0, 0, focal_length]))
 
     write_prefix(file, image_width, image_height)
@@ -57,7 +68,7 @@ def gen(file):
 
 
 def main():
-    file_name = './output/sky_.ppm'
+    file_name = './output/red_ball.ppm'
     # if not os.path.exists(file_name):
     #     open(file_name, 'w').close()
     with open(file_name, 'w') as file:
