@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Vec3:
-    def __init__(self, arr) -> None:
+    def __init__(self, arr: np.array = np.array([0, 0, 0])) -> None:
         self.e = arr
 
     def x(self) -> float:
@@ -52,8 +52,10 @@ class Vec3:
 
     def unit(self):
         len = self.length()
-
         return Vec3(self.e / len)
+
+    def __str__(self):
+        return '{}_{}_{}'.format(self.e[0], self.e[1], self.e[2])
 
 
 class color(Vec3):
