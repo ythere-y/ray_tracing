@@ -50,6 +50,24 @@ def ray_color(r: Ray, world: hittable,  depth: int) -> color:
     return color(np.array([1, 1, 1])*(1-t)+np.array([0.5, 0.7, 1.0])*t)
 
 
+def gen_at_pos(file, i: int, j: int, world, samples_per_pixel, image_width, image_height, max_depth, cam):
+    pixel_color = color(np.array([0, 0, 0]))
+    if GL_ray_mode == RayMode.Direct:
+        u = i/(image_width-1)
+        v = j/(image_height-1)
+        r = cam.get_ray(u, v)
+        pixel_color += ray_color(r, world, max_depth)
+        write_color(file, pixel_color)
+    elif GL_ray_mode == RayMode.Random:
+        for _ in range(samples_per_pixel):
+            u = (i+random_float())/(image_width-1)
+            v = (j+random_float())/(image_height-1)
+            r = cam.get_ray(u, v)
+            pixel_color += ray_color(r, world, max_depth)
+        write_color(file, pixel_color, samples_per_pixel)
+    pass
+
+
 def ground_viewer(file):
 
     # image
@@ -88,20 +106,8 @@ def ground_viewer(file):
     for j in range(image_height-1, -1, -1):
         print('j = {}'.format(j))
         for i in range(image_width):
-            pixel_color = color(np.array([0, 0, 0]))
-            if GL_ray_mode == RayMode.Direct:
-                u = i/(image_width-1)
-                v = j/(image_height-1)
-                r = cam.get_ray(u, v)
-                pixel_color += ray_color(r, world, max_depth)
-                write_color(file, pixel_color)
-            elif GL_ray_mode == RayMode.Random:
-                for _ in range(samples_per_pixel):
-                    u = (i+random_float())/(image_width-1)
-                    v = (j+random_float())/(image_height-1)
-                    r = cam.get_ray(u, v)
-                    pixel_color += ray_color(r, world, max_depth)
-                write_color(file, pixel_color, samples_per_pixel)
+            gen_at_pos(file=file, i=i, j=j, world=world, samples_per_pixel=samples_per_pixel,
+                       image_width=image_width, image_height=image_height, max_depth=max_depth, cam=cam)
 
 
 def gen(file) -> float:
