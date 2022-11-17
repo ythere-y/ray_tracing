@@ -1,10 +1,7 @@
-import os
-import traceback
-import model
-from model import color, Ray, point3, Vec3, hittable, hit_record, hittable_list, sphere, Camera
-
+from model import *
+import time
 import numpy as np
-from utils import write_prefix, random_float, RayMode
+from utils import *
 
 GL_sample_num = 10
 GL_ray_mode = RayMode.Direct
@@ -18,7 +15,7 @@ def output_train(file):
     for j in range(ny-1, -1, -1):
         for i in range(nx):
             pixel_color = color(np.array([i/nx, j/ny, 0.25]))
-            model.write_color(file, pixel_color)
+            write_color(file, pixel_color)
 
 
 def hit_sphere(center: point3, radius: float, r: Ray) -> bool:
@@ -104,21 +101,23 @@ def ground_viewer(file):
                 v = j/(image_height-1)
                 r = cam.get_ray(u, v)
                 pixel_color += ray_color(r, world)
-                model.write_color(file, pixel_color)
+                write_color(file, pixel_color)
             elif GL_ray_mode == RayMode.Random:
                 for _ in range(samples_per_pixel):
                     u = (i+random_float())/(image_width-1)
                     v = (j+random_float())/(image_height-1)
                     r = cam.get_ray(u, v)
                     pixel_color += ray_color(r, world)
-                model.write_color(file, pixel_color, samples_per_pixel)
+                write_color(file, pixel_color, samples_per_pixel)
 
 
-def gen(file):
+def gen(file) -> float:
     print('gen started')
+    start_time = time.time()
     ground_viewer(file)
-
+    end_time = time.time()
     print('gen finished')
+    return end_time-start_time
 
 
 def main():
@@ -127,11 +126,11 @@ def main():
         file_name = './output/two_ball_direct.ppm'
     elif GL_ray_mode == RayMode.Random:
         file_name = './output/two_ball_random_{}.ppm'.format(GL_sample_num)
-    # if not os.path.exists(file_name):
-    #     open(file_name, 'w').close()
+    time_list = []
     with open(file_name, 'w') as file:
-        gen(file)
-    # gen(None)
+        time_list.append(gen(file))
+    for duration in time_list:
+        print('time usage = {:.2f} s'.format(duration))
     return
 
 
