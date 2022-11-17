@@ -37,3 +37,11 @@ def clamp_vec(vec: np.array, min: float, max: float) -> np.array:
     for i in range(len(vec)):
         vec[i] = clamp(vec[i], min, max)
     return vec
+
+
+def random_array() -> np.array:
+    return np.array([random_float(), random_float(), random_float()])
+
+
+def random_array_range(min: float, max: float) -> np.array:
+    return np.array([random_float_range(min, max), random_float_range(min, max), random_float_range(min, max)])

@@ -58,6 +58,12 @@ class Vec3:
     def __str__(self):
         return '{}_{}_{}'.format(self.e[0], self.e[1], self.e[2])
 
+    def random():
+        return Vec3(utils.random_array())
+
+    def random_range(min: float, max: float):
+        return Vec3(utils.random_array_range(min, max))
+
 
 class color(Vec3):
     def __str__(self) -> str:
@@ -85,3 +91,11 @@ def write_color(file, color: color, samples_per_pixel: int = 1):
         print(write_out)
     else:
         file.write(write_out)
+
+
+def random_in_unit_sphere() -> Vec3:
+    while (True):
+        p = Vec3.random_range(-1, 1)
+        if p.length_squared() >= 1:
+            continue
+        return p

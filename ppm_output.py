@@ -30,11 +30,15 @@ def hit_sphere(center: point3, radius: float, r: Ray) -> bool:
         return (-half_b-np.sqrt(discriminant))/a
 
 
-def ray_color(r: Ray, world: hittable) -> color:
+def ray_color(r: Ray, world: hittable,  depth: int) -> color:
+    if depth <= 0:
+        return color(np.array([0, 0, 0]))
     hit_any, rec = world.hit(r, 0, float('inf'))
     if hit_any:
         # print(rec.normal)
-        return color(0.5*(np.array([1, 1, 1])+rec.normal.vec()))
+        target = rec.p+rec.normal+random_in_unit_sphere()
+        return ray_color(Ray(rec.p, target-rec.p), world, depth-1)*0.5
+        # return color(0.5*(np.array([1, 1, 1])+rec.normal.vec()))
     unit_direction = r.direction().unit()
     t = 0.5*(unit_direction.y()+1.0)
     return color(np.array([1, 1, 1])*(1-t)+np.array([0.5, 0.7, 1.0])*t)
@@ -72,6 +76,7 @@ def ground_viewer(file):
     image_width = 400
     image_height = int(image_width/aspect_ratio)
     samples_per_pixel = GL_sample_num
+    max_depth = 50
 
     # world
     world = hittable_list()
@@ -100,7 +105,7 @@ def ground_viewer(file):
                 u = i/(image_width-1)
                 v = j/(image_height-1)
                 r = cam.get_ray(u, v)
-                pixel_color += ray_color(r, world)
+                pixel_color += ray_color(r, world, max_depth)
                 write_color(file, pixel_color)
             elif GL_ray_mode == RayMode.Random:
                 for _ in range(samples_per_pixel):
@@ -108,7 +113,7 @@ def ground_viewer(file):
                     v = (j+random_float())/(image_height-1)
                     r = cam.get_ray(u, v)
                     pixel_color += ray_color(r, world)
-                write_color(file, pixel_color, samples_per_pixel)
+                write_color(file, pixel_color, samples_per_pixel, max_depth)
 
 
 def gen(file) -> float:
@@ -122,10 +127,11 @@ def gen(file) -> float:
 
 def main():
     # file_name = './output/see_ground.ppm'
+    mid_name = 'diffuse'
     if GL_ray_mode == RayMode.Direct:
-        file_name = './output/two_ball_direct.ppm'
+        file_name = './output/{}_direct.ppm'.format(mid_name)
     elif GL_ray_mode == RayMode.Random:
-        file_name = './output/two_ball_random_{}.ppm'.format(GL_sample_num)
+        file_name = './output/{}_random_{}.ppm'.format(mid_name, GL_sample_num)
     time_list = []
     with open(file_name, 'w') as file:
         time_list.append(gen(file))
