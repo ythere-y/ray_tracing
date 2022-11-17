@@ -35,12 +35,15 @@ def hit_sphere(center: point3, radius: float, r: Ray) -> bool:
 def ray_color(r: Ray, world: hittable,  depth: int) -> color:
     if depth <= 0:
         return color(np.array([0, 0, 0]))
-    hit_any, rec = world.hit(r, 0, float('inf'))
+    hit_any, rec = world.hit(r, 0.001, float('inf'))
     if hit_any:
         # print(rec.normal)
         # target = rec.p+rec.normal+random_unit_vector()
-        target = rec.p+random_in_hemishpere(rec.normal)
-        return ray_color(Ray(rec.p, target-rec.p), world, depth-1)*0.5
+        scatter_flag, attenuation, scattered = rec.mat_ptr.scatter(r, rec)
+        if scatter_flag:
+            return color(ray_color(scattered, world, depth-1).vec()*attenuation.vec())
+        # target = rec.p+random_in_hemishpere(rec.normal)
+        # return ray_color(Ray(rec.p, target-rec.p), world, depth-1)*0.5
         # return color(0.5*(np.array([1, 1, 1])+rec.normal.vec()))
     unit_direction = r.direction().unit()
     t = 0.5*(unit_direction.y()+1.0)
@@ -58,8 +61,15 @@ def ground_viewer(file):
 
     # world
     world = hittable_list()
-    world.add(sphere(point3(np.array([0, 0, -1])), 0.5))
-    world.add(sphere(point3(np.array([0, -100.5, -1])), 100))
+    material_ground = lambertion(color(np.array([0.8, 0.8, 0.0])))
+    material_center = lambertion(color(np.array([0.7, 0.3, 0.3])))
+    material_left = metal(color(np.array([0.8, 0.8, 0.8])))
+    material_right = metal(color(np.array([0.8, 0.6, 0.2])))
+
+    world.add(sphere(point3(np.array([0, -100.5, -1])), 100, material_ground))
+    world.add(sphere(point3(np.array([0, 0, -1])), 0.5, material_center))
+    world.add(sphere(point3(np.array([-1, 0, -1])), 0.5, material_left))
+    world.add(sphere(point3(np.array([1, 0, -1])), 0.5, material_right))
 
     # camera
     viewport_height = 2
@@ -104,7 +114,7 @@ def gen(file) -> float:
 
 
 def main():
-    mid_name = 'diffuse_hemi_reflect_fix'
+    mid_name = 'material_4'
     if GL_ray_mode == RayMode.Direct:
         file_name = './output/{}_direct.ppm'.format(mid_name)
     elif GL_ray_mode == RayMode.Random:

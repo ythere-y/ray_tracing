@@ -1,10 +1,9 @@
 from abc import ABCMeta, abstractmethod
 
-from .material import material
 import numpy as np
 from typing import Tuple
 from .Ray import Ray
-from .Vec3 import Vec3, point3
+from .Vec3 import *
 
 
 class hit_record:
@@ -21,6 +20,44 @@ class hit_record:
             self.normal = outward_normal
         else:
             self.normal = -outward_normal
+
+
+class material:
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self) -> None:
+        pass
+
+    @abstractmethod
+    def scatter(self, r_in: Ray, rec: hit_record) -> Tuple[bool, color, Ray]:
+        pass
+
+
+class lambertion(material):
+
+    def __init__(self, color: color) -> None:
+        self.albedo: color = color
+
+    def scatter(self, r_in: Ray, rec: hit_record) -> Tuple[bool,  color, Ray]:
+        scatter_direction = rec.normal+random_unit_vector()
+        if scatter_direction.near_zero():
+            scatter_direction = rec.normal
+        scattered = Ray(rec.p, scatter_direction)
+        attenuation = self.albedo
+        return True, attenuation, scattered
+
+
+class metal(material):
+    def __init__(self, color: color) -> None:
+        self.albedo: color = color
+
+    def scatter(self, r_in: Ray, rec: hit_record) -> Tuple[bool, color, Ray]:
+        reflected = reflect(r_in.direction().unit(), rec.normal)
+        scattered = Ray(rec.p, reflected)
+        attenuation = self.albedo
+        scatter_flat = scattered.direction().dot(rec.normal) > 0
+        return scatter_flat, attenuation, scattered
 
 
 class hittable:

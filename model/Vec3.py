@@ -64,6 +64,10 @@ class Vec3:
     def random_range(min: float, max: float):
         return Vec3(utils.random_array_range(min, max))
 
+    def near_zero(self) -> bool:
+        s = 1e-8
+        return (self.e[0] < s) and (self.e[1] < s) and (self.e[2] < s)
+
 
 class color(Vec3):
     def __str__(self) -> str:
@@ -109,3 +113,7 @@ def random_in_hemishpere(normal: Vec3) -> Vec3:
     if in_unit_shpere.dot(normal) > 0.0:
         return in_unit_shpere
     return -in_unit_shpere
+
+
+def reflect(v: Vec3, u: Vec3) -> Vec3:
+    return v-u*v.dot(u)*2
