@@ -71,7 +71,7 @@ class point3(Vec3):
     pass
 
 
-def write_color(file, color: color, samples_per_pixel: int):
+def write_color(file, color: color, samples_per_pixel: int = 1):
     scale = 1/samples_per_pixel
     out_vec = color.vec()*scale
     cl_min = 0.0
