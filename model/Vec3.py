@@ -78,7 +78,7 @@ class point3(Vec3):
 
 
 def write_color(file, color: color, samples_per_pixel: int = 1):
-    out_vec = utils.gamma_x(color.vec, 2, 1/samples_per_pixel)
+    out_vec = utils.gamma_x(color.vec(), 2, 1/samples_per_pixel)
     cl_min = 0.0
     cl_max = 0.999
 
@@ -98,3 +98,14 @@ def random_in_unit_sphere() -> Vec3:
         if p.length_squared() >= 1:
             continue
         return p
+
+
+def random_unit_vector() -> Vec3:
+    return random_in_unit_sphere().unit()
+
+
+def random_in_hemishpere(normal: Vec3) -> Vec3:
+    in_unit_shpere = random_in_unit_sphere()
+    if in_unit_shpere.dot(normal) > 0.0:
+        return in_unit_shpere
+    return -in_unit_shpere

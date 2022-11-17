@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-
+from .material import material
 import numpy as np
 from typing import Tuple
 from .Ray import Ray
@@ -13,6 +13,7 @@ class hit_record:
         self.normal = normal
         self.t = t
         self.front_face = front_face
+        self.mat_ptr: material
 
     def set_face_normal(self, r: Ray, outward_normal: Vec3):
         self.front_face = r.direction().dot(outward_normal) < 0
@@ -57,9 +58,10 @@ class hittable_list(hittable):
 
 
 class sphere(hittable):
-    def __init__(self, center, radius) -> None:
+    def __init__(self, center: point3, radius: float, m: material) -> None:
         self.center = center
         self.radius = radius
+        self.mat_ptr: material = m
 
     def hit(self, r: Ray, t_min: float, t_max: float) -> Tuple[bool, hit_record]:
         oc = r.origin()-self.center
@@ -82,4 +84,5 @@ class sphere(hittable):
         rec.p = r.at(root)
         outward_normal = (rec.p-self.center)/self.radius
         rec.set_face_normal(r, outward_normal)
+        rec.mat_ptr = self.mat_ptr
         return True, rec
