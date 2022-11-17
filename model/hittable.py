@@ -49,12 +49,13 @@ class lambertion(material):
 
 
 class metal(material):
-    def __init__(self, color: color) -> None:
+    def __init__(self, color: color, fuzz: float) -> None:
         self.albedo: color = color
+        self.fuzz = min(fuzz, 1)
 
     def scatter(self, r_in: Ray, rec: hit_record) -> Tuple[bool, color, Ray]:
         reflected = reflect(r_in.direction().unit(), rec.normal)
-        scattered = Ray(rec.p, reflected)
+        scattered = Ray(rec.p, reflected+random_in_unit_sphere()*self.fuzz)
         attenuation = self.albedo
         scatter_flat = scattered.direction().dot(rec.normal) > 0
         return scatter_flat, attenuation, scattered

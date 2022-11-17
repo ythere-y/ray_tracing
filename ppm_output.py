@@ -12,9 +12,9 @@ GL_max_depth = 40
 GL_map_prefix = './output/mid/map'
 # GL_concurrency = False
 GL_concurrency = True
-GL_image_with = 100
+GL_image_with = 400
 GL_ration = 16/9
-GL_task_name = 'material_4'
+GL_task_name = 'fuzz'
 
 
 def output_train(file):
@@ -114,8 +114,8 @@ def ground_viewer():
     world = hittable_list()
     material_ground = lambertion(color(np.array([0.8, 0.8, 0.0])))
     material_center = lambertion(color(np.array([0.7, 0.3, 0.3])))
-    material_left = metal(color(np.array([0.8, 0.8, 0.8])))
-    material_right = metal(color(np.array([0.8, 0.6, 0.2])))
+    material_left = metal(color(np.array([0.8, 0.8, 0.8])), 0.3)
+    material_right = metal(color(np.array([0.8, 0.6, 0.2])), 0.1)
 
     world.add(
         sphere(point3(np.array([0, -100.5, -1])), 100, material_ground))
