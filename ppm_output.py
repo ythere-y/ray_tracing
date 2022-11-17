@@ -2,11 +2,17 @@ from model import *
 import time
 import numpy as np
 from utils import *
+import threading
 
 GL_sample_num = 40
 # GL_ray_mode = RayMode.Direct
 GL_ray_mode = RayMode.Random
 GL_max_depth = 40
+GL_map_prefix = './output/con/material_4_dir_map'
+GL_reduce_prefix = './output/con/material_4_ran_reduce'
+GL_concurrency = False
+GL_image_with = 40
+GL_ration = 16/9
 
 
 def output_train(file):
@@ -50,29 +56,50 @@ def ray_color(r: Ray, world: hittable,  depth: int) -> color:
     return color(np.array([1, 1, 1])*(1-t)+np.array([0.5, 0.7, 1.0])*t)
 
 
-def gen_at_pos(file, i: int, j: int, world, samples_per_pixel, image_width, image_height, max_depth, cam):
-    pixel_color = color(np.array([0, 0, 0]))
+def gen_at_line(j: int, world, samples_per_pixel, image_width, image_height, max_depth, cam):
+    # cur_file = gen_map_file(GL_map_prefix, j)
+    with open('{}_{}.mp'.format(GL_map_prefix, j), 'w') as file:
+        for i in range(image_width):
+            pixel_color = color(np.array([0, 0, 0]))
+            if GL_ray_mode == RayMode.Direct:
+                u = i/(image_width-1)
+                v = j/(image_height-1)
+                r = cam.get_ray(u, v)
+                pixel_color += ray_color(r, world, max_depth)
+                write_color(file, pixel_color)
+            elif GL_ray_mode == RayMode.Random:
+                for _ in range(samples_per_pixel):
+                    u = (i+random_float())/(image_width-1)
+                    v = (j+random_float())/(image_height-1)
+                    r = cam.get_ray(u, v)
+                    pixel_color += ray_color(r, world, max_depth)
+                write_color(file, pixel_color, samples_per_pixel)
+        file.close()
+
+
+def ground_viewer():
+    # file_name
+    run_mode = ''
+    if GL_concurrency:
+        run_mode = 'concurrency'
+    else:
+        run_mode = 'flow'
+    task_name = 'material_4'
+    ray_mode = ''
+    sample_num = ''
     if GL_ray_mode == RayMode.Direct:
-        u = i/(image_width-1)
-        v = j/(image_height-1)
-        r = cam.get_ray(u, v)
-        pixel_color += ray_color(r, world, max_depth)
-        write_color(file, pixel_color)
-    elif GL_ray_mode == RayMode.Random:
-        for _ in range(samples_per_pixel):
-            u = (i+random_float())/(image_width-1)
-            v = (j+random_float())/(image_height-1)
-            r = cam.get_ray(u, v)
-            pixel_color += ray_color(r, world, max_depth)
-        write_color(file, pixel_color, samples_per_pixel)
-    pass
+        ray_mode = 'dir'
+        sample_num = '1'
+    else:
+        ray_mode = 'ran'
+        sample_num = str(GL_sample_num)
 
-
-def ground_viewer(file):
+    target_file_prefix = './output/{}/{}_{}_{}'.format(
+        run_mode, task_name, ray_mode, sample_num)
 
     # image
-    aspect_ratio = 16/9
-    image_width = 400
+    aspect_ratio = GL_ration
+    image_width = GL_image_with
     image_height = int(image_width/aspect_ratio)
     samples_per_pixel = GL_sample_num
     max_depth = GL_max_depth
@@ -102,32 +129,61 @@ def ground_viewer(file):
         vertical/2-Vec3(np.array([0, 0, focal_length]))
 
     # render
-    write_prefix(file, image_width, image_height)
-    for j in range(image_height-1, -1, -1):
-        print('j = {}'.format(j))
-        for i in range(image_width):
-            gen_at_pos(file=file, i=i, j=j, world=world, samples_per_pixel=samples_per_pixel,
-                       image_width=image_width, image_height=image_height, max_depth=max_depth, cam=cam)
+    if GL_concurrency == True:
+        threads = []
+        for j in range(image_height-1, -1, -1):
+            # print('j = {}'.format(j))
+            printProgressBar(image_height-j, image_height,
+                             prefix='Map', suffix='Map all started', length=40)
+            t = threading.Thread(target=gen_at_line, args=(
+                j, world, samples_per_pixel, image_width, image_height, max_depth, cam))
+            threads.append(t)
+            t.start()
+        for t in threads:
+            t.join()
+        reduce_files(GL_map_prefix, image_height, GL_reduce_prefix,
+                     image_width=image_width, image_height=image_height)
+    else:
+        with open('{}.ppm'.format(target_file_prefix), 'w')as file:
+            write_prefix(file, image_width, image_height)
+            for j in range(image_height-1, -1, -1):
+                for i in range(image_width):
+                    pixel_color = color(np.array([0, 0, 0]))
+                    if GL_ray_mode == RayMode.Direct:
+                        u = i/(image_width-1)
+                        v = j/(image_height-1)
+                        r = cam.get_ray(u, v)
+                        pixel_color += ray_color(r, world, max_depth)
+                        write_color(file, pixel_color)
+                    elif GL_ray_mode == RayMode.Random:
+                        for _ in range(samples_per_pixel):
+                            u = (i+random_float())/(image_width-1)
+                            v = (j+random_float())/(image_height-1)
+                            r = cam.get_ray(u, v)
+                            pixel_color += ray_color(r, world, max_depth)
+                        write_color(file, pixel_color, samples_per_pixel)
+            file.close()
 
 
-def gen(file) -> float:
+def gen() -> float:
     print('gen started')
     start_time = time.time()
-    ground_viewer(file)
+    ground_viewer()
     end_time = time.time()
     print('gen finished')
     return end_time-start_time
 
 
 def main():
-    mid_name = 'material_4'
+    mid_name = '/con/material_4'
     if GL_ray_mode == RayMode.Direct:
         file_name = './output/{}_direct.ppm'.format(mid_name)
     elif GL_ray_mode == RayMode.Random:
         file_name = './output/{}_random_{}.ppm'.format(mid_name, GL_sample_num)
+
     time_list = []
-    with open(file_name, 'w') as file:
-        time_list.append(gen(file))
+    time_list.append(gen())
+
     for duration in time_list:
         print('time usage = {:.2f} s'.format(duration))
     print('out file name = {}'.format(file_name))
