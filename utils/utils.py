@@ -1,7 +1,11 @@
 import numpy as np
 
-infinity = float('inf')
-pi = np.pi
+
+def write_prefix(file, width, height):
+    if file == None:
+        print("P3\n{} {}\n255\n".format(width, height), end='')
+    else:
+        file.write("P3\n{} {}\n255\n".format(width, height))
 
 
 def degree_to_radians(degrees: float) -> float:
@@ -10,6 +14,10 @@ def degree_to_radians(degrees: float) -> float:
 
 def random_float() -> float:
     return np.random.uniform(0, 1)
+
+
+def random_float_range(min: float, max: float) -> float:
+    return np.random.uniform(min, max)
 
 
 def clamp(x: float, min: float, max: float) -> float:

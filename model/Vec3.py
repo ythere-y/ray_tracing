@@ -1,4 +1,5 @@
 import numpy as np
+import utils
 
 
 class Vec3:
@@ -60,7 +61,6 @@ class Vec3:
 
 class color(Vec3):
     def __str__(self) -> str:
-
         out_vec = self.vec()*255.999
         return "{} {} {}\n".format(int(out_vec[0]),
                                    int(out_vec[1]), int(out_vec[2]))
@@ -71,9 +71,17 @@ class point3(Vec3):
     pass
 
 
-def write_color(file, color):
+def write_color(file, color: color, samples_per_pixel: int):
+    scale = 1/samples_per_pixel
+    out_vec = color.vec()*scale
+    cl_min = 0.0
+    cl_max = 0.999
+
+    color_txt = utils.clamp_vec(out_vec, cl_min, cl_max)
+    color_txt = color_txt*256
+    write_out = '{} {} {}\n'.format(
+        int(color_txt[0]), int(color_txt[1]), int(color_txt[2]))
     if file == None:
-        print(color)
+        print(write_out)
     else:
-        # get = str(color)
-        file.write(str(color))
+        file.write(write_out)
