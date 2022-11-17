@@ -78,8 +78,7 @@ class point3(Vec3):
 
 
 def write_color(file, color: color, samples_per_pixel: int = 1):
-    scale = 1/samples_per_pixel
-    out_vec = color.vec()*scale
+    out_vec = utils.gamma_x(color.vec, 2, 1/samples_per_pixel)
     cl_min = 0.0
     cl_max = 0.999
 

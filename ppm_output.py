@@ -3,8 +3,10 @@ import time
 import numpy as np
 from utils import *
 
-GL_sample_num = 10
-GL_ray_mode = RayMode.Direct
+GL_sample_num = 40
+# GL_ray_mode = RayMode.Direct
+GL_ray_mode = RayMode.Random
+GL_max_depth = 40
 
 
 def output_train(file):
@@ -76,7 +78,7 @@ def ground_viewer(file):
     image_width = 400
     image_height = int(image_width/aspect_ratio)
     samples_per_pixel = GL_sample_num
-    max_depth = 50
+    max_depth = GL_max_depth
 
     # world
     world = hittable_list()
@@ -98,8 +100,8 @@ def ground_viewer(file):
     # render
     write_prefix(file, image_width, image_height)
     for j in range(image_height-1, -1, -1):
+        print('j = {}'.format(j))
         for i in range(image_width):
-            print('i = {}, j = {}'.format(i, j))
             pixel_color = color(np.array([0, 0, 0]))
             if GL_ray_mode == RayMode.Direct:
                 u = i/(image_width-1)
@@ -112,8 +114,8 @@ def ground_viewer(file):
                     u = (i+random_float())/(image_width-1)
                     v = (j+random_float())/(image_height-1)
                     r = cam.get_ray(u, v)
-                    pixel_color += ray_color(r, world)
-                write_color(file, pixel_color, samples_per_pixel, max_depth)
+                    pixel_color += ray_color(r, world, max_depth)
+                write_color(file, pixel_color, samples_per_pixel)
 
 
 def gen(file) -> float:

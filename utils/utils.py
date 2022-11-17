@@ -45,3 +45,15 @@ def random_array() -> np.array:
 
 def random_array_range(min: float, max: float) -> np.array:
     return np.array([random_float_range(min, max), random_float_range(min, max), random_float_range(min, max)])
+
+
+def gamma_x(vec: np.array, x: int, scale: int):
+    return pow(vec*scale, 1/x)
+
+
+def gamma_2(vec: np.array) -> np.array:
+    return np.sqrt(vec)
+
+
+test = np.array([4, 4, 4])
+print(gamma_x(test, 2, 1))
