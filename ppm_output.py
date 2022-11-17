@@ -3,6 +3,7 @@ import time
 import numpy as np
 from utils import *
 import threading
+import multiprocessing
 
 GL_sample_num = 40
 # GL_ray_mode = RayMode.Direct
@@ -11,7 +12,7 @@ GL_max_depth = 40
 GL_map_prefix = './output/mid/map'
 # GL_concurrency = False
 GL_concurrency = True
-GL_image_with = 400
+GL_image_with = 100
 GL_ration = 16/9
 GL_task_name = 'material_4'
 
@@ -93,8 +94,8 @@ def build_target_name() -> str:
         ray_mode = 'ran'
         sample_num = str(GL_sample_num)
 
-    target_file_prefix = './output/{}/{}_{}_{}'.format(
-        run_mode, task_name, ray_mode, sample_num)
+    target_file_prefix = './output/{}/{}_{}_{}_{}'.format(
+        run_mode, task_name, ray_mode, GL_image_with, sample_num)
     return target_file_prefix
 
 
@@ -136,16 +137,14 @@ def ground_viewer():
 
     # render
     if GL_concurrency == True:
-        threads = []
+        pool = multiprocessing.Pool(processes=6)
         for j in range(image_height-1, -1, -1):
             printProgressBar(image_height-j, image_height,
                              prefix='Map', suffix='Map all started', length=40)
-            t = threading.Thread(target=gen_at_line, args=(
+            pool.apply_async(func=gen_at_line, args=(
                 j, world, samples_per_pixel, image_width, image_height, max_depth, cam))
-            threads.append(t)
-            t.start()
-        for t in threads:
-            t.join()
+        pool.close()
+        pool.join()
         reduce_files(GL_map_prefix, image_height, target_file_prefix,
                      image_width=image_width, image_height=image_height)
     else:
