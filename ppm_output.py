@@ -8,11 +8,12 @@ GL_sample_num = 40
 # GL_ray_mode = RayMode.Direct
 GL_ray_mode = RayMode.Random
 GL_max_depth = 40
-GL_map_prefix = './output/con/material_4_dir_map'
-GL_reduce_prefix = './output/con/material_4_ran_reduce'
-GL_concurrency = False
-GL_image_with = 40
+GL_map_prefix = './output/mid/map'
+# GL_concurrency = False
+GL_concurrency = True
+GL_image_with = 400
 GL_ration = 16/9
+GL_task_name = 'material_4'
 
 
 def output_train(file):
@@ -57,8 +58,7 @@ def ray_color(r: Ray, world: hittable,  depth: int) -> color:
 
 
 def gen_at_line(j: int, world, samples_per_pixel, image_width, image_height, max_depth, cam):
-    # cur_file = gen_map_file(GL_map_prefix, j)
-    with open('{}_{}.mp'.format(GL_map_prefix, j), 'w') as file:
+    with open(gen_map_file_name(GL_map_prefix, j), 'w') as file:
         for i in range(image_width):
             pixel_color = color(np.array([0, 0, 0]))
             if GL_ray_mode == RayMode.Direct:
@@ -77,14 +77,13 @@ def gen_at_line(j: int, world, samples_per_pixel, image_width, image_height, max
         file.close()
 
 
-def ground_viewer():
-    # file_name
+def build_target_name() -> str:
     run_mode = ''
     if GL_concurrency:
         run_mode = 'concurrency'
     else:
         run_mode = 'flow'
-    task_name = 'material_4'
+    task_name = GL_task_name
     ray_mode = ''
     sample_num = ''
     if GL_ray_mode == RayMode.Direct:
@@ -96,6 +95,12 @@ def ground_viewer():
 
     target_file_prefix = './output/{}/{}_{}_{}'.format(
         run_mode, task_name, ray_mode, sample_num)
+    return target_file_prefix
+
+
+def ground_viewer():
+    # file_name
+    target_file_prefix = build_target_name()
 
     # image
     aspect_ratio = GL_ration
@@ -111,7 +116,8 @@ def ground_viewer():
     material_left = metal(color(np.array([0.8, 0.8, 0.8])))
     material_right = metal(color(np.array([0.8, 0.6, 0.2])))
 
-    world.add(sphere(point3(np.array([0, -100.5, -1])), 100, material_ground))
+    world.add(
+        sphere(point3(np.array([0, -100.5, -1])), 100, material_ground))
     world.add(sphere(point3(np.array([0, 0, -1])), 0.5, material_center))
     world.add(sphere(point3(np.array([-1, 0, -1])), 0.5, material_left))
     world.add(sphere(point3(np.array([1, 0, -1])), 0.5, material_right))
@@ -132,7 +138,6 @@ def ground_viewer():
     if GL_concurrency == True:
         threads = []
         for j in range(image_height-1, -1, -1):
-            # print('j = {}'.format(j))
             printProgressBar(image_height-j, image_height,
                              prefix='Map', suffix='Map all started', length=40)
             t = threading.Thread(target=gen_at_line, args=(
@@ -141,7 +146,7 @@ def ground_viewer():
             t.start()
         for t in threads:
             t.join()
-        reduce_files(GL_map_prefix, image_height, GL_reduce_prefix,
+        reduce_files(GL_map_prefix, image_height, target_file_prefix,
                      image_width=image_width, image_height=image_height)
     else:
         with open('{}.ppm'.format(target_file_prefix), 'w')as file:
@@ -163,6 +168,7 @@ def ground_viewer():
                             pixel_color += ray_color(r, world, max_depth)
                         write_color(file, pixel_color, samples_per_pixel)
             file.close()
+    print('target file name = {}'.format(target_file_prefix))
 
 
 def gen() -> float:
@@ -175,18 +181,11 @@ def gen() -> float:
 
 
 def main():
-    mid_name = '/con/material_4'
-    if GL_ray_mode == RayMode.Direct:
-        file_name = './output/{}_direct.ppm'.format(mid_name)
-    elif GL_ray_mode == RayMode.Random:
-        file_name = './output/{}_random_{}.ppm'.format(mid_name, GL_sample_num)
-
     time_list = []
     time_list.append(gen())
 
     for duration in time_list:
         print('time usage = {:.2f} s'.format(duration))
-    print('out file name = {}'.format(file_name))
     return
 
 

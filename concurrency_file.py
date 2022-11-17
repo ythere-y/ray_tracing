@@ -3,8 +3,9 @@ import time
 import threading
 import random
 import numpy as np
+import multiprocessing
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+# from mpl_toolkits.mplot3d import Axes3D
 
 map_file_prefix = './output/con/map'
 reduce_file_prefix = './output/con/reduce'
@@ -94,7 +95,7 @@ def concurrency_func():
     for i in range(GL_max_file):
         printProgressBar(i+1, GL_max_file, prefix='Flow',
                          suffix='Flow finished', length=40)
-        t = threading.Thread(target=takeSleep, args=(str(i), 'zzz'))
+        t = threading.Thread(target=map_write_file, args=(i, ))
         threads.append(t)
         t.start()
     for t in threads:
@@ -104,9 +105,21 @@ def concurrency_func():
     return
 
 
+def pool_concurrency_func(proc_num: int = 5):
+    pool = multiprocessing.Pool(processes=proc_num)
+    for i in range(GL_max_file):
+        printProgressBar(i+1, GL_max_file, prefix='Flow',
+                         suffix='Flow finished', length=40)
+        pool.apply_async(func=map_write_file, args=(i,))
+    pool.close()
+    pool.join()
+    reduce_file()
+    return
+
+
 def test_average_time(f):
     start_time = time.time()
-    count = 5
+    count = 1
     for _ in range(count):
         f()
     end_time = time.time()
@@ -114,23 +127,35 @@ def test_average_time(f):
     print('{} use time = {} s\n'.format(f.__name__, average_time))
 
 
-print('lab test result =>')
-test_average_time(raw_func)
-test_average_time(flow_func)
-test_average_time(concurrency_func)
+def test_proc_num_affect():
+    proc_list: list[int] = []
+    for i in range(1, 11):
+        proc_list.append(i)
+    proc_list.append(20)
+    proc_list.append(40)
+    proc_list.append(80)
+    repeat = 3
+    time_list: list[float] = []
+    for proc in proc_list:
+        start_time = time.time()
+        for _ in range(repeat):
+            pool_concurrency_func(proc)
+        end_time = time.time()
+        duration = (end_time-start_time)/repeat
+        time_list.append(duration)
+    plt.figure()
+    plt.plot(proc_list, time_list, color='red', linewidth=1)
+    plt.xlabel('proc_num')
+    plt.ylabel('average_time(s)')
+    plt.title('proc_num -> time')
+    plt.savefig('./output/fig/proc_time.png')
+    plt.show()
 
 
-# print('主程序开始运行...')
-# threads=[]
-# for i in range(0, 50):
-#     t=threading.Thread(target=takeSleep, args=(str(i), 'zhangphil'))
-#     threads.append(t)
-#     t.start()
-
-# print('主程序运行中...')
-
-# # 等待所有线程任务结束。
-# for t in threads:
-#     t.join()
-
-# print("所有线程任务完成")
+if __name__ == '__main__':
+    print('lab test result =>')
+    # test_average_time(raw_func)
+    # test_average_time(flow_func)
+    # test_average_time(concurrency_func)
+    # test_average_time(pool_concurrency_func)
+    test_proc_num_affect()
