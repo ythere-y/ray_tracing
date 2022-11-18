@@ -14,7 +14,7 @@ GL_map_prefix = './output/mid/{}_map'
 GL_concurrency = True
 GL_image_with = 500
 GL_ration = 16/9
-GL_task_name = 'total_reflection'
+GL_task_name = 'red_blue'
 
 
 def hit_sphere(center: point3, radius: float, r: Ray) -> bool:
@@ -96,32 +96,31 @@ def ground_viewer():
     max_depth = GL_max_depth
 
     # world
-    world = hittable_list()
-    material_ground = lambertion(favor_color.Purple)
-    material_center = lambertion(color(np.array([0.7, 0.3, 0.3])))
-    # material_center = dielectric(1.5)
-    # material_left = metal(color(np.array([0.8, 0.8, 0.8])), 0.3)
-    material_left = dielectric(1.5)
-    # material_right = metal(color(np.array([0.8, 0.6, 0.2])), 1.0)
-    material_right = metal(color(np.array([0.8, 0.6, 0.2])), 0.0)
+    R = np.cos(np.pi/4)
 
-    world.add(
-        sphere(point3(np.array([0, -100.5, -1])), 100, material_ground))
-    world.add(sphere(point3(np.array([0, 0, -1])), 0.5, material_center))
-    world.add(sphere(point3(np.array([-1, 0, -1])), -0.4, material_left))
-    world.add(sphere(point3(np.array([1, 0, -1])), 0.5, material_right))
+    world = hittable_list()
+    material_left = lambertion(color(np.array([0, 0, 1])))
+    material_right = lambertion(color(np.array([1, 0, 0])))
+    world.add(sphere(point3(np.array([-R, 0, -1])), R, material_left))
+    world.add(sphere(point3(np.array([R, 0, -1])), R, material_right))
+
+    # material_ground = lambertion(favor_color.Purple)
+    # material_center = lambertion(color(np.array([0.7, 0.3, 0.3])))
+    # # material_center = dielectric(1.5)
+    # # material_left = metal(color(np.array([0.8, 0.8, 0.8])), 0.3)
+    # material_left = dielectric(1.5)
+    # # material_right = metal(color(np.array([0.8, 0.6, 0.2])), 1.0)
+    # material_right = metal(color(np.array([0.8, 0.6, 0.2])), 0.0)
+
+    # world.add(
+    #     sphere(point3(np.array([0, -100.5, -1])), 100, material_ground))
+    # world.add(sphere(point3(np.array([0, 0, -1])), 0.5, material_center))
+    # world.add(sphere(point3(np.array([-1, 0, -1])), -0.4, material_left))
+    # world.add(sphere(point3(np.array([1, 0, -1])), 0.5, material_right))
 
     # camera
-    viewport_height = 2
-    viewport_width = aspect_ratio*viewport_height
-    focal_length = 1
-    cam = Camera()
 
-    origin = point3(np.array([0, 0, 0]))
-    horizontal = Vec3(np.array([viewport_width, 0, 0]))
-    vertical = Vec3(np.array([0, viewport_height, 0]))
-    lower_left_corner = origin-horizontal/2 -\
-        vertical/2-Vec3(np.array([0, 0, focal_length]))
+    cam = Camera(90.0, aspect_ratio)
 
     # render
     if GL_concurrency == True:

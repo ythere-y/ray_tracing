@@ -4,9 +4,14 @@ import numpy as np
 
 
 class Camera:
-    def __init__(self) -> None:
-        aspect_ratio = 16/9
-        viewport_height = 2.0
+    def __init__(self, vfow: float, aspect_ratio: float) -> None:
+        # aspect_ratio = 16/9
+        # viewport_height = 2.0
+        # viewport_width = aspect_ratio*viewport_height
+
+        theta = np.deg2rad(vfow)
+        h = np.tan(theta/2)
+        viewport_height = 2.0*h
         viewport_width = aspect_ratio*viewport_height
         focal_length = 1.0
 
