@@ -77,7 +77,7 @@ def reduce_files(map_prefix: str, task_name: str, map_range: int, reduce_prefix:
                 out_file.write(in_str)
                 in_file.close()
             os.unlink(in_file_name)
-            print('try to remove file = ', in_file_name)
+            # print('try to remove file = ', in_file_name)
         out_file.close()
 
     print('out file = ', out_file_name)

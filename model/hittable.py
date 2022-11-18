@@ -4,6 +4,7 @@ import numpy as np
 from typing import Tuple
 from .Ray import Ray
 from .Vec3 import *
+from utils import *
 
 
 class hit_record:
@@ -55,8 +56,9 @@ class metal(material):
 
     def scatter(self, r_in: Ray, rec: hit_record) -> Tuple[bool, color, Ray]:
         reflected = reflect(r_in.direction().unit(), rec.normal)
-        scattered = Ray(rec.p, point3(reflected.vec() +
-                        self.fuzz*random_in_unit_sphere().vec()))
+        # scattered = Ray(rec.p, point3(reflected.vec() +
+        #                 self.fuzz*random_in_unit_sphere().vec()))
+        scattered = Ray(rec.p, point3(reflected.vec()))
         attenuation = self.albedo
         scatter_flag = scattered.direction().dot(rec.normal) > 0
         return scatter_flag, attenuation, scattered
@@ -65,6 +67,12 @@ class metal(material):
 class dielectric(material):
     def __init__(self, index_of_refraction: float) -> None:
         self.ir = index_of_refraction
+
+    def reflectance(self, cosin: float, ref_idx: float) -> float:
+        # Use Schlick's approximation reflectance.
+        r0 = (1-ref_idx)/(1+ref_idx)
+        r0 = r0*r0
+        return r0+(1-r0)*pow((1-cosin), 5)
 
     def scatter(self, r_in: Ray, rec: hit_record) -> Tuple[bool, color, Ray]:
         attenuation = color(np.array([1, 1, 1]))
@@ -76,7 +84,7 @@ class dielectric(material):
 
         cannot_refract = refraction_ratio * sin_theta > 1.0
 
-        if cannot_refract:
+        if (cannot_refract or self.reflectance(cos_theta, refraction_ratio) > random_float()):
             direction = reflect(unit_direction, rec.normal)
         else:
             direction = refract(unit_direction, rec.normal, refraction_ratio)
