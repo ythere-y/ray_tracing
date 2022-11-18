@@ -56,9 +56,9 @@ class metal(material):
 
     def scatter(self, r_in: Ray, rec: hit_record) -> Tuple[bool, color, Ray]:
         reflected = reflect(r_in.direction().unit(), rec.normal)
-        # scattered = Ray(rec.p, point3(reflected.vec() +
-        #                 self.fuzz*random_in_unit_sphere().vec()))
-        scattered = Ray(rec.p, point3(reflected.vec()))
+        scattered = Ray(rec.p, point3(reflected.vec() +
+                        self.fuzz*random_in_unit_sphere().vec()))
+        # scattered = Ray(rec.p, point3(reflected.vec()))
         attenuation = self.albedo
         scatter_flag = scattered.direction().dot(rec.normal) > 0
         return scatter_flag, attenuation, scattered

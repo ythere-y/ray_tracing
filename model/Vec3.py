@@ -81,6 +81,18 @@ class point3(Vec3):
     pass
 
 
+def cross(u: Vec3, v: Vec3) -> Vec3:
+    return Vec3(np.cross(u.vec(), v.vec()))
+
+
+def unit(u: Vec3, v: Vec3) -> float:
+    return u.vec().dot(v.vec())
+
+
+def unit_vector(v: Vec3) -> Vec3:
+    return v/v.length()
+
+
 def write_color(file, color: color, samples_per_pixel: int = 1):
     out_vec = utils.gamma_x(color.vec(), 2, 1/samples_per_pixel)
     cl_min = 0.0
