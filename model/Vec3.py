@@ -117,3 +117,10 @@ def random_in_hemishpere(normal: Vec3) -> Vec3:
 
 def reflect(v: Vec3, u: Vec3) -> Vec3:
     return v-u*v.dot(u)*2
+
+
+def refracct(uv: Vec3, n: Vec3, etai_over_etai: float) -> Vec3:
+    cos_theta = min(-uv.dot(n), 1.0)
+    r_out_perp = (uv+n*cos_theta)*etai_over_etai
+    r_out_parallel = -n*(np.sqrt(np.abs(1.0-r_out_perp.length_squared())))
+    return r_out_perp+r_out_parallel

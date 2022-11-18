@@ -61,6 +61,21 @@ class metal(material):
         return scatter_flat, attenuation, scattered
 
 
+class dielectric(material):
+    def __init__(self, index_of_refraction: float) -> None:
+        self.ir = index_of_refraction
+
+    def scatter(self, r_in: Ray, rec: hit_record) -> Tuple[bool, color, Ray]:
+        attenuation = color(np.array([1, 1, 1]))
+        refraction_ratio = (1/self.ir) if rec.front_face else self.ir
+
+        unit_direction = r_in.direction().unit()
+        refracted = refracct(unit_direction, rec.normal, refraction_ratio)
+
+        scattered = Ray(rec.p, refracted)
+        return True, attenuation, scattered
+
+
 class hittable:
     __metaclass__ = ABCMeta
 

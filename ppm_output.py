@@ -14,7 +14,7 @@ GL_map_prefix = './output/mid/map'
 GL_concurrency = True
 GL_image_with = 400
 GL_ration = 16/9
-GL_task_name = 'fuzz'
+GL_task_name = 'refract'
 
 
 def output_train(file):
@@ -113,9 +113,11 @@ def ground_viewer():
     # world
     world = hittable_list()
     material_ground = lambertion(color(np.array([0.8, 0.8, 0.0])))
-    material_center = lambertion(color(np.array([0.7, 0.3, 0.3])))
-    material_left = metal(color(np.array([0.8, 0.8, 0.8])), 0.3)
-    material_right = metal(color(np.array([0.8, 0.6, 0.2])), 0.1)
+    # material_center = lambertion(color(np.array([0.7, 0.3, 0.3])))
+    material_center = dielectric(1.5)
+    # material_left = metal(color(np.array([0.8, 0.8, 0.8])), 0.3)
+    material_left = dielectric(1.5)
+    material_right = metal(color(np.array([0.8, 0.6, 0.2])), 1.0)
 
     world.add(
         sphere(point3(np.array([0, -100.5, -1])), 100, material_ground))
