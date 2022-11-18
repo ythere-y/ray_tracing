@@ -45,7 +45,7 @@ class Vec3:
     def length_squared(self) -> float:
         return self.e.dot(self.e)
 
-    def dot(self, other):
+    def dot(self, other) -> float:
         return self.e.dot(other.vec())
 
     def cross(self, other):
@@ -116,11 +116,34 @@ def random_in_hemishpere(normal: Vec3) -> Vec3:
 
 
 def reflect(v: Vec3, u: Vec3) -> Vec3:
-    return v-u*v.dot(u)*2
+    return v-u*(v.dot(u)*2)
 
 
-def refracct(uv: Vec3, n: Vec3, etai_over_etai: float) -> Vec3:
+def refract(uv: Vec3, n: Vec3, etai_over_etai: float) -> Vec3:
     cos_theta = min(-uv.dot(n), 1.0)
-    r_out_perp = (uv+n*cos_theta)*etai_over_etai
-    r_out_parallel = -n*(np.sqrt(np.abs(1.0-r_out_perp.length_squared())))
-    return r_out_perp+r_out_parallel
+    r_out_prep = (uv+n*cos_theta)*etai_over_etai
+    r_out_parallel = -n*(np.sqrt(np.abs(1.0-r_out_prep.length_squared())))
+    return r_out_prep+r_out_parallel
+
+
+def rgb(r, g, b) -> np.array:
+    return np.array([r/255, g/255, b/255])
+
+
+class favor_color:
+    Beige = color(rgb(240, 202, 163))
+    Pink = color(rgb(192, 96, 161))
+    Purple = color(rgb(59, 24, 95))
+    Navy = color(rgb(0, 0, 92))
+
+    Earth = color(rgb(40, 84, 48))
+    Nature = color(rgb(95, 141, 78))
+    Green = color(rgb(164, 190, 123))
+
+    Red = color(rgb(220, 53, 53))
+    Orange = color(rgb(244, 157, 26))
+    Yellow = color(rgb(255, 225, 93))
+
+    White = color(rgb(255, 255, 255))
+    Black = color(rgb(0, 0, 0))
+    Teal = color(rgb(160, 228, 203))

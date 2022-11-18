@@ -55,10 +55,11 @@ class metal(material):
 
     def scatter(self, r_in: Ray, rec: hit_record) -> Tuple[bool, color, Ray]:
         reflected = reflect(r_in.direction().unit(), rec.normal)
-        scattered = Ray(rec.p, reflected+random_in_unit_sphere()*self.fuzz)
+        scattered = Ray(rec.p, point3(reflected.vec() +
+                        self.fuzz*random_in_unit_sphere().vec()))
         attenuation = self.albedo
-        scatter_flat = scattered.direction().dot(rec.normal) > 0
-        return scatter_flat, attenuation, scattered
+        scatter_flag = scattered.direction().dot(rec.normal) > 0
+        return scatter_flag, attenuation, scattered
 
 
 class dielectric(material):
@@ -70,9 +71,17 @@ class dielectric(material):
         refraction_ratio = (1/self.ir) if rec.front_face else self.ir
 
         unit_direction = r_in.direction().unit()
-        refracted = refracct(unit_direction, rec.normal, refraction_ratio)
+        cos_theta = min(rec.normal.dot(-unit_direction), 1.0)
+        sin_theta = np.sqrt(1.0-cos_theta*cos_theta)
 
-        scattered = Ray(rec.p, refracted)
+        cannot_refract = refraction_ratio * sin_theta > 1.0
+
+        if cannot_refract:
+            direction = reflect(unit_direction, rec.normal)
+        else:
+            direction = refract(unit_direction, rec.normal, refraction_ratio)
+
+        scattered = Ray(rec.p, direction)
         return True, attenuation, scattered
 
 

@@ -65,12 +65,13 @@ def gen_map_file(file_prefix: str, idx: int):
         return file
 
 
-def reduce_files(map_prefix: str, map_range: int, reduce_prefix: str, image_width: int, image_height: int):
+def reduce_files(map_prefix: str, task_name: str, map_range: int, reduce_prefix: str, image_width: int, image_height: int):
     out_file_name = '{}.ppm'.format(reduce_prefix)
     with open(out_file_name, 'w') as out_file:
         write_prefix(out_file, image_width, image_height)
         for i in range(map_range-1, -1, -1):
-            in_file_name = gen_map_file_name(map_prefix, i)
+            in_file_name = gen_map_file_name(
+                map_prefix.format(task_name), i)
             with open(in_file_name, 'r') as in_file:
                 in_str = in_file.read()
                 out_file.write(in_str)

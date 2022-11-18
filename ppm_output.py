@@ -5,27 +5,16 @@ from utils import *
 import threading
 import multiprocessing
 
-GL_sample_num = 40
+GL_sample_num = 10
 # GL_ray_mode = RayMode.Direct
 GL_ray_mode = RayMode.Random
-GL_max_depth = 40
-GL_map_prefix = './output/mid/map'
+GL_max_depth = 50
+GL_map_prefix = './output/mid/{}_map'
 # GL_concurrency = False
 GL_concurrency = True
-GL_image_with = 400
+GL_image_with = 100
 GL_ration = 16/9
-GL_task_name = 'refract'
-
-
-def output_train(file):
-    nx = 200
-    ny = 100
-    write_prefix(file, nx, ny)
-    # file.write("P3\n{} {}\n255\n".format(nx, ny))
-    for j in range(ny-1, -1, -1):
-        for i in range(nx):
-            pixel_color = color(np.array([i/nx, j/ny, 0.25]))
-            write_color(file, pixel_color)
+GL_task_name = 'fuzz_small'
 
 
 def hit_sphere(center: point3, radius: float, r: Ray) -> bool:
@@ -42,24 +31,20 @@ def hit_sphere(center: point3, radius: float, r: Ray) -> bool:
 
 def ray_color(r: Ray, world: hittable,  depth: int) -> color:
     if depth <= 0:
-        return color(np.array([0, 0, 0]))
+        return favor_color.Black
     hit_any, rec = world.hit(r, 0.001, float('inf'))
     if hit_any:
-        # print(rec.normal)
-        # target = rec.p+rec.normal+random_unit_vector()
         scatter_flag, attenuation, scattered = rec.mat_ptr.scatter(r, rec)
         if scatter_flag:
             return color(ray_color(scattered, world, depth-1).vec()*attenuation.vec())
-        # target = rec.p+random_in_hemishpere(rec.normal)
-        # return ray_color(Ray(rec.p, target-rec.p), world, depth-1)*0.5
-        # return color(0.5*(np.array([1, 1, 1])+rec.normal.vec()))
+    # background
     unit_direction = r.direction().unit()
     t = 0.5*(unit_direction.y()+1.0)
-    return color(np.array([1, 1, 1])*(1-t)+np.array([0.5, 0.7, 1.0])*t)
+    return color(favor_color.White.vec()*(1-t)+favor_color.Teal.vec()*t)
 
 
-def gen_at_line(j: int, world, samples_per_pixel, image_width, image_height, max_depth, cam):
-    with open(gen_map_file_name(GL_map_prefix, j), 'w') as file:
+def gen_at_line(j: int, world, samples_per_pixel, image_width, image_height, max_depth, cam: Camera):
+    with open(gen_map_file_name(GL_map_prefix.format(GL_task_name), j), 'w') as file:
         for i in range(image_width):
             pixel_color = color(np.array([0, 0, 0]))
             if GL_ray_mode == RayMode.Direct:
@@ -113,10 +98,10 @@ def ground_viewer():
     # world
     world = hittable_list()
     material_ground = lambertion(color(np.array([0.8, 0.8, 0.0])))
-    # material_center = lambertion(color(np.array([0.7, 0.3, 0.3])))
-    material_center = dielectric(1.5)
-    # material_left = metal(color(np.array([0.8, 0.8, 0.8])), 0.3)
-    material_left = dielectric(1.5)
+    material_center = lambertion(color(np.array([0.7, 0.3, 0.3])))
+    # material_center = dielectric(1.5)
+    material_left = metal(color(np.array([0.8, 0.8, 0.8])), 0.3)
+    # material_left = dielectric(1.5)
     material_right = metal(color(np.array([0.8, 0.6, 0.2])), 1.0)
 
     world.add(
@@ -147,7 +132,7 @@ def ground_viewer():
                 j, world, samples_per_pixel, image_width, image_height, max_depth, cam))
         pool.close()
         pool.join()
-        reduce_files(GL_map_prefix, image_height, target_file_prefix,
+        reduce_files(GL_map_prefix, GL_task_name, image_height, target_file_prefix,
                      image_width=image_width, image_height=image_height)
     else:
         with open('{}.ppm'.format(target_file_prefix), 'w')as file:
