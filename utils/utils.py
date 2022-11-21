@@ -83,7 +83,7 @@ def reduce_files(map_prefix: str, task_name: str, map_range: int, reduce_prefix:
     print('out file = ', out_file_name)
 
 
-def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
+def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='>', printEnd="\r"):
     """
     Call in a loop to create terminal progress bar
     @params:

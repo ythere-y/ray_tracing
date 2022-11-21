@@ -138,6 +138,15 @@ def refract(uv: Vec3, n: Vec3, etai_over_etai: float) -> Vec3:
     return r_out_prep+r_out_parallel
 
 
+def random_in_unit_disk() -> Vec3:
+    while True:
+        p = Vec3(
+            np.array([np.random.uniform(-1, 1), np.random.uniform(-1, 1), 0]))
+        if p.length_squared() >= 1:
+            continue
+        return p
+
+
 def rgb(r, g, b) -> np.array:
     return np.array([r/255, g/255, b/255])
 
@@ -159,3 +168,17 @@ class favor_color:
     White = color(rgb(255, 255, 255))
     Black = color(rgb(0, 0, 0))
     Teal = color(rgb(160, 228, 203))
+
+    Grey = color(rgb(214, 228, 229))
+
+    def Random(min: float = 0, max: float = 1.0) -> color:
+        r = np.random.uniform(min, max)
+        g = np.random.uniform(min, max)
+        b = np.random.uniform(min, max)
+        return color(np.array([r, g, b]))
+
+    def Random_twice(min: float = 0, max: float = 1.0) -> color:
+        r = np.random.uniform(min, max)
+        g = np.random.uniform(min, max)
+        b = np.random.uniform(min, max)
+        return color(np.array([r*g, g*b, b*r]))
